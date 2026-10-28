@@ -46,7 +46,10 @@ def is_internal(url, host):
 
 
 def is_subdomain(url, host):
-    return is_internal(url, host) and url_host(url) != host
+    target = url_host(url)
+    if target.startswith("www."):
+        target = target[4:]
+    return target != host and target.endswith(f".{host}")
 
 
 def is_document(url):

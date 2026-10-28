@@ -48,6 +48,7 @@ def test_internal_urls_include_subdomains():
 def test_subdomain_detection():
     assert is_subdomain("https://news.example.com/a", "example.com")
     assert not is_subdomain("https://example.com/a", "example.com")
+    assert not is_subdomain("https://www.example.com/a", "example.com")
 
 
 def test_url_host():
