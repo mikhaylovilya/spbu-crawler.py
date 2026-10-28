@@ -23,7 +23,7 @@
 ## Установка
 
 ```bash
-git clone git@github.com:mikhaylovilya/spbu-crawler.py.git
+git clone https://github.com/mikhaylovilya/spbu-crawler.py.git
 cd spbu-crawler.py
 python3 -m venv .venv
 source .venv/bin/activate
