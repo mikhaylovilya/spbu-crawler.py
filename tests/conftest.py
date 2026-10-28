@@ -12,13 +12,17 @@ def site():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             requests_seen.append(self.path)
-            status, content_type, body = routes.get(
+            route = routes.get(
                 self.path, (404, "text/html", "<html><body>Not found</body></html>")
             )
+            status, content_type, body = route[:3]
+            headers = route[3] if len(route) > 3 else {}
             payload = body.encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(payload)))
+            for name, value in headers.items():
+                self.send_header(name, value)
             self.end_headers()
             self.wfile.write(payload)
 

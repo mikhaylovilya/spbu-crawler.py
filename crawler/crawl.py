@@ -78,11 +78,15 @@ class Crawler:
                 )
                 continue
 
-            content_type = response.headers.get("Content-Type", "").split(";")[0].lower()
+            content_type = (
+                response.headers.get("Content-Type", "").split(";")[0].strip().lower()
+            )
             if content_type and content_type not in HTML_TYPES:
                 continue
 
             final_url = normalize_url(response.url) or url
+            if not self._can_crawl(final_url):
+                continue
             seen.add(final_url)
             page = extract_page(
                 response.content,

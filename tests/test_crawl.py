@@ -82,6 +82,48 @@ def test_crawl_respects_max_pages(site):
     assert seen == ["/", "/a"]
 
 
+def test_crawl_accepts_content_type_with_spaces(site):
+    base_url, routes, seen = site
+    routes["/"] = (200, " text/html ; charset=UTF-8 ", "<html><body>Hi</body></html>")
+
+    result = make_crawler(f"{base_url}/").crawl()
+
+    assert len(result.pages) == 1
+    assert seen == ["/"]
+
+
+def test_crawl_uses_redirected_url(site):
+    base_url, routes, seen = site
+    routes["/"] = (302, "text/html", "", {"Location": "/a"})
+    routes["/a"] = (200, "text/html", "<html><body>A</body></html>")
+
+    result = make_crawler(f"{base_url}/").crawl()
+
+    assert [page.url for page in result.pages] == [f"{base_url}/a"]
+    assert seen == ["/", "/a"]
+
+
+def test_crawl_skips_redirects_to_external_sites():
+    class FakeResponse:
+        status_code = 200
+        headers = {"Content-Type": "text/html"}
+        content = b"<html><body>External</body></html>"
+        url = "https://external.example/page"
+
+    class RedirectingSession:
+        headers = {}
+
+        def get(self, url, **kwargs):
+            return FakeResponse()
+
+    result = make_crawler(
+        "https://example.com/", session=RedirectingSession()
+    ).crawl()
+
+    assert result.pages == []
+    assert result.failures == []
+
+
 def test_crawl_skips_documents_and_non_html_responses(site):
     base_url, routes, seen = site
     routes["/"] = (
